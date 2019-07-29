@@ -24,7 +24,7 @@ const proxy_test = async () => {
 
     const data = response.data;
     console.log(data);
-    await proxy_test();
+    //await proxy_test();
   } catch (err) {
     console.log('broken');
     //proxy_test();
