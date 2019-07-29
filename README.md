@@ -6,4 +6,4 @@ get /api/v1/proxies for a list of rotating proxies
 
 get /api/v1/agents for a list of user agents
 
-*web scrapes a couple sites, so api could break if those sites update
+***web scrapes a couple sites, so api could break if those sites update***
