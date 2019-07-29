@@ -1,6 +1,6 @@
 # proxy_rotator
 
-A express api that returns a list of rotating proxies and user agents 
+An express api that returns a list of rotating proxies and user agents 
 
 get /api/v1/proxies for a list of rotating proxies
 
