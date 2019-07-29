@@ -44,39 +44,43 @@ const proxy_List = async () => {
 
     return ip_list;
   } catch (err) {
-    console.log('broken');
+    return { message: 'broken' };
   }
 };
 
 const agent_list = async () => {
-  var response = await axios.get(
-    'https://developers.whatismybrowser.com/useragents/explore/software_type_specific/crawler/',
-    {}
-  );
+  try {
+    var response = await axios.get(
+      'https://developers.whatismybrowser.com/useragents/explore/software_type_specific/crawler/',
+      {}
+    );
 
-  const data = response.data;
+    const data = response.data;
 
-  const $ = cheerio.load(data);
+    const $ = cheerio.load(data);
 
-  const agent = $(
-    'body > div.content-base > section > div > table > tbody > tr:nth-child(1) > td.useragent'
-  ).text();
-
-  const agnt_list = [];
-
-  for (
-    var i = 1;
-    i <=
-    $('body > div.content-base > section > div > table > tbody > tr').length;
-    i++
-  ) {
     const agent = $(
-      `body > div.content-base > section > div > table > tbody > tr:nth-child(${i}) > td.useragent`
+      'body > div.content-base > section > div > table > tbody > tr:nth-child(1) > td.useragent'
     ).text();
-    agnt_list.push(agent);
-  }
 
-  return agnt_list;
+    const agnt_list = [];
+
+    for (
+      var i = 1;
+      i <=
+      $('body > div.content-base > section > div > table > tbody > tr').length;
+      i++
+    ) {
+      const agent = $(
+        `body > div.content-base > section > div > table > tbody > tr:nth-child(${i}) > td.useragent`
+      ).text();
+      agnt_list.push(agent);
+    }
+
+    return agnt_list;
+  } catch (err) {
+    return { message: 'broken' };
+  }
 };
 
 router.get('/', async (req, res) => {
