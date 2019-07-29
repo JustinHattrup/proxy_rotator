@@ -2,40 +2,107 @@ const express = require('express');
 const router = express.Router();
 const cheerio = require('cheerio');
 const axios = require('axios');
-const ytdl = require('ytdl-core');
-const request = require('request');
 
-const httpsProxyAgent = require('https-proxy-agent');
+//https://httpbin.org/ip
+//https://httpbin.org/user-agent
 
-var count = 0;
-
-/* TODO: 
-    web scrape the free proxy set
-    alternate random proxies */
-
-const proxy_test = async () => {
+const proxy_List = async () => {
   try {
-    const response = await axios.get('http://httpbin.org/ip', {
-      proxy: {
-        host: '80.211.135.240',
-        port: 8080
-      }
-    });
+    var response = await axios.get('http://free-proxy-list.net/', {});
 
     const data = response.data;
-    console.log(data);
-    //await proxy_test();
+
+    const $ = cheerio.load(data);
+
+    const ip_list = [];
+
+    for (var i = 1; i <= 300; i++) {
+      const _ip = $(
+        `#proxylisttable > tbody > tr:nth-child(${i}) > td:nth-child(1)`
+      ).text();
+
+      const _port = $(
+        `#proxylisttable > tbody > tr:nth-child(${i}) > td:nth-child(2)`
+      ).text();
+
+      const _anon = $(
+        `#proxylisttable > tbody > tr:nth-child(${i}) > td:nth-child(5)`
+      ).text();
+
+      if (
+        $(`#proxylisttable > tbody > tr:nth-child(${i}) > td:nth-child(7)`)
+          .text()
+          .includes('yes')
+      ) {
+        ip_list.push({
+          ip: _ip,
+          port: parseInt(_port, 10),
+          anon: _anon
+        });
+      }
+    }
+
+    return ip_list;
   } catch (err) {
     console.log('broken');
-    //proxy_test();
   }
 };
 
-proxy_test();
+const agent_list = async () => {
+  var response = await axios.get(
+    'https://developers.whatismybrowser.com/useragents/explore/software_type_specific/crawler/',
+    {}
+  );
+
+  const data = response.data;
+
+  const $ = cheerio.load(data);
+
+  const agent = $(
+    'body > div.content-base > section > div > table > tbody > tr:nth-child(1) > td.useragent'
+  ).text();
+
+  const agnt_list = [];
+
+  for (
+    var i = 1;
+    i <=
+    $('body > div.content-base > section > div > table > tbody > tr').length;
+    i++
+  ) {
+    const agent = $(
+      `body > div.content-base > section > div > table > tbody > tr:nth-child(${i}) > td.useragent`
+    ).text();
+    agnt_list.push(agent);
+  }
+
+  return agnt_list;
+};
 
 router.get('/', async (req, res) => {
   try {
-    res.json({ message: 'hello world' });
+    res.json({
+      message:
+        '/v1/proxies to get list of proxies OR /v1/agents to get list of agents'
+    });
+  } catch (err) {
+    res.json({ message: err });
+  }
+});
+
+router.get('/v1/proxies', async (req, res) => {
+  try {
+    const list = await proxy_List();
+    res.json(list);
+  } catch (err) {
+    res.json({ message: err });
+  }
+});
+
+router.get('/v1/agents', async (req, res) => {
+  try {
+    const list = await agent_list();
+    res.json(list);
   } catch (err) {
     res.json({ message: err });
   }
