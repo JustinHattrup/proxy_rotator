@@ -39,14 +39,15 @@ const proxy_List = async () => {
         ip_list.push({
           ip: _ip,
           port: parseInt(_port, 10),
-          anon: _anon
+          anon: _anon,
+          works: null
         });
       }
     }
 
     return ip_list;
   } catch (err) {
-    return { message: 'broken' };
+    return -1;
   }
 };
 
@@ -81,9 +82,122 @@ const agent_list = async () => {
 
     return agnt_list;
   } catch (err) {
-    return { message: 'broken' };
+    return -1;
   }
 };
+
+//https://httpbin.org/ip
+//https://httpbin.org/user-agent
+
+const rotate_proxy = async proxy_List => {
+  const ip_list = await proxy_List();
+
+  if (ip_list != -1) {
+    const rand = Math.floor(Math.random() * ip_list.length);
+    return ip_list[rand].resolve;
+  } else {
+    return -1;
+  }
+};
+
+const rotate_agnt = async () => {
+  const agnt_list = await agent_list();
+
+  if (agnt_list != -1) {
+    const rand = Math.floor(Math.random() * agnt_list.length);
+    return agnt_list[rand];
+  } else {
+    return -1;
+  }
+};
+
+/* working on testing each ip and updates works element, then passes new updated ip list */
+
+const youtube_scrape = async (ip, agnt) => {
+  if (typeof ip !== 'undefined') {
+    var test = null;
+
+    console.log(ip[0]);
+    for (var i = 0; i < ip.length; i++) {
+      if (ip[i].works == null) {
+        test = ip[i];
+        break;
+      }
+    }
+    console.log(test);
+
+    /*if (ip != -1) {
+      try {
+        var response = await axios.get('https://httpbin.org/ip', {
+          proxy: {
+            host: ip.ip,
+            port: ip.port
+          },
+          headers: {
+            'user-agent': agnt
+          }
+        });
+  
+        const data = response.data;
+  
+        //const $ = cheerio.load(data);
+  
+        youtube_scrape();
+  
+        console.log(data);
+      } catch (error) {
+
+        youtube_scrape();
+      }
+    } else {
+      console.log('something went wrong');
+    } */
+  } else {
+    console.log('undefined so passing values');
+    const _ip = await proxy_List();
+    const _agnt = await rotate_agnt();
+    youtube_scrape(_ip, _agnt);
+  }
+
+  /* if (ip != -1) {
+    try {
+      var response = await axios.get('https://httpbin.org/ip', {
+        proxy: {
+          host: ip.ip,
+          port: ip.port
+        },
+        headers: {
+          'user-agent': agnt
+        }
+      });
+
+      const data = response.data;
+
+      //const $ = cheerio.load(data);
+
+      youtube_scrape();
+
+      console.log(data);
+    } catch (error) {
+      youtube_scrape();
+    }
+  } else {
+    console.log('something went wrong');
+  } */
+};
+
+youtube_scrape();
+
+/* const main = async () => {
+  const ip = await rotate_proxy();
+  const agnt = await rotate_agnt();
+
+  if (ip != -1 && agnt != -1) {
+    youtube_scrape(ip, agnt);
+  }
+};
+
+main(); */
 
 router.get('/', async (req, res) => {
   try {
